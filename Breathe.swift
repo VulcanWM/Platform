@@ -12,23 +12,28 @@ struct BreatheBar: View {
                 .fill(.gray)
                 .frame(width: thickness, height: size)
                 .offset(x: (size / 2 + thickness / 2) + 20)
-                .scaleEffect(
-                    x: 1,
-                    y: 1,
-                    anchor: .trailing
-                )
+
             Rectangle()
                 .fill(.orange)
                 .frame(width: thickness, height: sizeOfBreathe)
-                .offset(x: (size / 2 + thickness / 2) + 20)
-                .scaleEffect(
-                    x: 1,
-                    y: 1,
-                    anchor: .trailing
+                .offset(
+                    x: (size / 2 + thickness / 2) + 20,
+                    y: (size - sizeOfBreathe) / 2
                 )
+
+            if count > 40 {
+                Rectangle()
+                    .fill(.red)
+                    .frame(width: thickness, height: size / 8)
+                    .offset(
+                        x: (size / 2 + thickness / 2) + 20,
+                        y: -(size / 2 - (size / 16))
+                    )
+            }
         }
     }
 }
+
 
 
 struct HoldButton: ButtonStyle {
@@ -69,7 +74,9 @@ struct BreatheView: View {
                         isPressed = false
                         timer?.invalidate()
                         breatheOut = true
-                        counter = 40
+                        if (counter > 40) {
+                            counter = 40
+                        }
                         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
                             DispatchQueue.main.async {
                                 if (counter == 0){
@@ -103,6 +110,7 @@ struct BreatheView: View {
                 }
 
                 Text(counter > 0 ? "\(counter/10)" : "  ")
+                Text((breatheOut == false && counter > 40) || (breatheOut && counter != 0) ? "breathe out" : "breathe in while holding")
 
                 Spacer()
 
