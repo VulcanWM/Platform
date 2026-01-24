@@ -1,54 +1,30 @@
 import SwiftUI
 
-struct FourSideBars: View {
+struct BreatheBar: View {
     let size: CGFloat
     let thickness: CGFloat = 10
-    let progress: CGFloat
+    let count: Int
+    var sizeOfBreathe: CGFloat { min(CGFloat(count) / 40 * size, size) }
 
     var body: some View {
         ZStack {
-            // top
             Rectangle()
-                .fill(.red)
-                .frame(width: size, height: thickness)
-                .offset(y: -(size / 2 + thickness / 2))
-                .scaleEffect(
-                    x: 1,
-                    y: 1,
-                    anchor: .top
-                )
-
-            // right
-            Rectangle()
-                .fill(.yellow)
+                .fill(.gray)
                 .frame(width: thickness, height: size)
-                .offset(x: (size / 2 + thickness / 2))
+                .offset(x: (size / 2 + thickness / 2) + 20)
                 .scaleEffect(
                     x: 1,
                     y: 1,
                     anchor: .trailing
                 )
-
-            // bottom
             Rectangle()
-                .fill(.green)
-                .frame(width: size, height: thickness)
-                .offset(y: (size / 2 + thickness / 2))
+                .fill(.orange)
+                .frame(width: thickness, height: sizeOfBreathe)
+                .offset(x: (size / 2 + thickness / 2) + 20)
                 .scaleEffect(
                     x: 1,
                     y: 1,
-                    anchor: .bottom
-                )
-
-            // left
-            Rectangle()
-                .fill(.blue)
-                .frame(width: thickness, height: size)
-                .offset(x: -(size / 2 + thickness / 2))
-                .scaleEffect(
-                    x: 1,
-                    y: 1,
-                    anchor: .leading
+                    anchor: .trailing
                 )
         }
     }
@@ -73,6 +49,7 @@ struct BreatheView: View {
     @State private var tapStatus = "hold to breathe"
     @State private var counter = 0
     @State private var timer: Timer?
+    @State private var breatheOut = true
 
     var body: some View {
         GeometryReader { geo in
@@ -82,18 +59,29 @@ struct BreatheView: View {
                 Spacer()
 
                 ZStack {
-                    FourSideBars(
+                    BreatheBar(
                         size: buttonSize,
-                        progress: CGFloat(counter) / 10
+                        count: counter
                     )
 
                     Button {
                         tapStatus = "finished breathing"
                         isPressed = false
                         timer?.invalidate()
-                        counter = 0
+                        breatheOut = true
+                        counter = 40
+                        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+                            DispatchQueue.main.async {
+                                if (counter == 0){
+                                    timer?.invalidate()
+                                } else {
+                                    counter -= 1
+                                }
+                            }
+                        }
+                        RunLoop.main.add(timer!, forMode: .common)
                     } label: {
-                        Text("HOLD")
+                        Text((breatheOut == false && counter > 40) || (breatheOut && counter != 0) ? "LET GO" : "HOLD")
                             .font(.system(size: buttonSize * 0.25, weight: .bold))
                     }
                     .buttonStyle(HoldButton(size: buttonSize))
@@ -102,6 +90,8 @@ struct BreatheView: View {
                             .onEnded { _ in
                                 tapStatus = "holding down"
                                 isPressed = true
+                                breatheOut = false
+                                timer?.invalidate()
                                 timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
                                     DispatchQueue.main.async {
                                         counter += 1
@@ -112,8 +102,7 @@ struct BreatheView: View {
                     )
                 }
 
-                Text(tapStatus)
-                Text("\(counter)")
+                Text(counter > 0 ? "\(counter/10)" : "  ")
 
                 Spacer()
 
