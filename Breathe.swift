@@ -5,31 +5,33 @@ struct BreatheBar: View {
     let thickness: CGFloat = 10
     let count: Int
     var sizeOfBreathe: CGFloat { min(CGFloat(count) / 40 * size, size) }
+    
+    @Environment(\.colorScheme) var colorScheme
+
+    var trackColour: Color {
+        colorScheme == .dark ? Color(.darkGray) : Color(red: 0.88, green: 0.86, blue: 0.83)
+    }
+
+    var fillColour: Color {
+        colorScheme == .dark ? Color.orange.opacity(0.9) : Color(red: 0.95, green: 0.55, blue: 0.25)
+    }
 
     var body: some View {
         ZStack {
-            Rectangle()
-                .fill(.gray)
+            Capsule()
+                .fill(trackColour)
                 .frame(width: thickness, height: size)
                 .offset(x: (size / 2 + thickness / 2) + 20)
 
-            Rectangle()
-                .fill(.orange)
+            Capsule()
+                .fill(fillColour)
                 .frame(width: thickness, height: sizeOfBreathe)
                 .offset(
                     x: (size / 2 + thickness / 2) + 20,
                     y: (size - sizeOfBreathe) / 2
                 )
+                .animation(.easeInOut(duration: 0.15), value: sizeOfBreathe)
 
-            if count > 40 {
-                Rectangle()
-                    .fill(.red)
-                    .frame(width: thickness, height: size / 8)
-                    .offset(
-                        x: (size / 2 + thickness / 2) + 20,
-                        y: -(size / 2 - (size / 16))
-                    )
-            }
         }
     }
 }
@@ -38,14 +40,28 @@ struct BreatheBar: View {
 
 struct HoldButton: ButtonStyle {
     let size: CGFloat
+    @Environment(\.colorScheme) var colorScheme
 
     func makeBody(configuration: Configuration) -> some View {
+        let gradientColors = colorScheme == .dark ?
+            [Color.orange.opacity(0.8), Color.orange.opacity(0.6)] :
+            [Color(red: 0.96, green: 0.6, blue: 0.3),
+             Color(red: 0.92, green: 0.5, blue: 0.2)]
+
         configuration.label
             .frame(width: size, height: size)
-            .background(Color(red: 0.9, green: 0.4, blue: 0))
+            .background(
+                LinearGradient(
+                    colors: gradientColors,
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
             .foregroundStyle(.white)
             .clipShape(Circle())
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
+            .shadow(color: colorScheme == .dark ? Color.black.opacity(0.5) : Color.black.opacity(0.3), radius: 12, y: 6)
+            .opacity(configuration.isPressed ? 0.9 : 1)
     }
 }
 
@@ -55,20 +71,21 @@ struct BreatheView: View {
     @State private var counter = 0
     @State private var timer: Timer?
     @State private var breatheOut = true
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         GeometryReader { geo in
             let buttonSize = geo.size.width * 0.7
-
+            
             VStack {
                 Spacer()
-
+                
                 ZStack {
                     BreatheBar(
                         size: buttonSize,
                         count: counter
                     )
-
+                    
                     Button {
                         tapStatus = "finished breathing"
                         isPressed = false
@@ -108,13 +125,19 @@ struct BreatheView: View {
                             }
                     )
                 }
-
-                Text(counter > 0 ? "\(counter/10)" : "  ")
-                Text((breatheOut == false && counter > 40) || (breatheOut && counter != 0) ? "breathe out" : "breathe in while holding")
-
+                
+                Text(counter > 0 ? "\(min(counter / 10 + 1, 5))" : "0")
+                    .font(.system(size: 24, weight: .medium))
+                    .foregroundColor(colorScheme == .dark ? .white : .secondary)
+                    .opacity(counter / 10 >= 4 ? 0.8 : 1)
+                
+                Text((!breatheOut && counter > 40) || (breatheOut && counter != 0) ? "breathe out" : "breathe in while holding")
+                    .font(.callout)
+                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.7) : .secondary)
+                    .padding(.top, 4)
+                
                 Spacer()
-
-                // bottom button
+                
                 NavigationLink {
                     TipsView()
                 } label: {
@@ -122,14 +145,22 @@ struct BreatheView: View {
                         .font(.headline)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(.black)
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .padding(.horizontal)
+                        .background(
+                            RoundedRectangle(cornerRadius: 50)
+                                .fill(colorScheme == .dark ? Color.gray.opacity(0.2) : Color.white)
+                        )
+                        .foregroundColor(colorScheme == .dark ? .white : .primary)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 50)
+                                .stroke(colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05))
+                        )
+                        .shadow(color: colorScheme == .dark ? Color.black.opacity(0.2) : Color.black.opacity(0.04), radius: 6, y: 2)
                 }
+                .padding(.horizontal, 16)
                 .padding(.bottom, 20)
             }
         }
         .navigationBarBackButtonHidden(true)
+        .background(colorScheme == .dark ? Color(red: 18/255, green: 18/255, blue: 18/255) : Color(red: 0.98, green: 0.95, blue: 0.90))
     }
 }

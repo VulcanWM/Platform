@@ -42,8 +42,16 @@ struct TipsView: View {
                         Spacer()
                     }
                     .padding()
-                    .background(Color(.systemGray6))
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .background(
+                        RoundedRectangle(cornerRadius: 50)
+                            .fill(Color.white)
+                    )
+                    .foregroundStyle(.primary)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 50)
+                            .stroke(Color.black.opacity(0.05))
+                    )
+                    .shadow(color: .black.opacity(0.04), radius: 6, y: 2)
                 }
             }
 
@@ -54,6 +62,7 @@ struct TipsView: View {
         .sheet(item: $selectedTip) { tip in
             TipSheet(tip: tip)
         }
+        .background(Color(red: 0.98, green: 0.95, blue: 0.90))
     }
 }
 
