@@ -72,95 +72,137 @@ struct BreatheView: View {
     @State private var timer: Timer?
     @State private var breatheOut = true
     @Environment(\.colorScheme) var colorScheme
+    @AppStorage("onboardingPage") var onboardingPage: Int = 1
+    
+    private func backToOnboarding() {
+        onboardingPage = 1
+    }
 
     var body: some View {
         GeometryReader { geo in
             let buttonSize = geo.size.width * 0.7
             
-            VStack {
-                Spacer()
-                
-                ZStack {
-                    BreatheBar(
-                        size: buttonSize,
-                        count: counter
-                    )
-                    
-                    Button {
-                        tapStatus = "finished breathing"
-                        isPressed = false
-                        timer?.invalidate()
-                        breatheOut = true
-                        if (counter > 40) {
-                            counter = 40
-                        }
-                        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-                            DispatchQueue.main.async {
-                                if (counter == 0){
-                                    timer?.invalidate()
-                                } else {
-                                    counter -= 1
-                                }
+            ZStack {
+                VStack {
+                    Text("just breathe")
+                        .font(.system(size: 36, weight: .bold))
+                        .foregroundColor(colorScheme == .dark ? .white : .primary)
+
+                    Text("you've got this")
+                        .font(.system(size: 18, weight: .medium))
+                        .foregroundColor(colorScheme == .dark ? .white.opacity(0.7) : .secondary)
+                }
+                .padding(.top, 60)
+                .frame(maxHeight: .infinity, alignment: .top)
+
+                VStack(spacing: 16) {
+                    ZStack {
+                        BreatheBar(
+                            size: buttonSize,
+                            count: counter
+                        )
+                        
+                        Button {
+                            tapStatus = "finished breathing"
+                            isPressed = false
+                            timer?.invalidate()
+                            breatheOut = true
+                            if (counter > 40) {
+                                counter = 40
                             }
-                        }
-                        RunLoop.main.add(timer!, forMode: .common)
-                    } label: {
-                        Text((breatheOut == false && counter > 40) || (breatheOut && counter != 0) ? "LET GO" : "HOLD")
-                            .font(.system(size: buttonSize * 0.25, weight: .bold))
-                    }
-                    .buttonStyle(HoldButton(size: buttonSize))
-                    .simultaneousGesture(
-                        LongPressGesture(minimumDuration: 0.1)
-                            .onEnded { _ in
-                                tapStatus = "holding down"
-                                isPressed = true
-                                breatheOut = false
-                                timer?.invalidate()
-                                timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-                                    DispatchQueue.main.async {
-                                        counter += 1
+                            timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+                                DispatchQueue.main.async {
+                                    if (counter == 0){
+                                        timer?.invalidate()
+                                    } else {
+                                        counter -= 1
                                     }
                                 }
-                                RunLoop.main.add(timer!, forMode: .common)
                             }
-                    )
+                            RunLoop.main.add(timer!, forMode: .common)
+                        } label: {
+                            Text((breatheOut == false && counter > 40) || (breatheOut && counter != 0) ? "let go" : "hold")
+                                .font(.system(size: buttonSize * 0.25, weight: .bold))
+                        }
+                        .buttonStyle(HoldButton(size: buttonSize))
+                        .simultaneousGesture(
+                            LongPressGesture(minimumDuration: 0.1)
+                                .onEnded { _ in
+                                    tapStatus = "holding down"
+                                    isPressed = true
+                                    breatheOut = false
+                                    timer?.invalidate()
+                                    timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+                                        DispatchQueue.main.async {
+                                            counter += 1
+                                        }
+                                    }
+                                    RunLoop.main.add(timer!, forMode: .common)
+                                }
+                        )
+                    }
+
+                    Text(counter > 0 ? "\(min(counter / 10 + 1, 5))" : "0")
+                        .font(.system(size: 24, weight: .medium))
+                        .foregroundColor(colorScheme == .dark ? .white : .secondary)
+                        .opacity(counter / 10 >= 4 ? 0.8 : 1)
+
+                    Text((!breatheOut && counter > 40) || (breatheOut && counter != 0) ? "breathe out" : "breathe in while holding the button")
+                        .font(.callout)
+                        .foregroundColor(colorScheme == .dark ? .white.opacity(0.7) : .secondary)
+                        .padding(.top, 4)
                 }
-                
-                Text(counter > 0 ? "\(min(counter / 10 + 1, 5))" : "0")
-                    .font(.system(size: 24, weight: .medium))
-                    .foregroundColor(colorScheme == .dark ? .white : .secondary)
-                    .opacity(counter / 10 >= 4 ? 0.8 : 1)
-                
-                Text((!breatheOut && counter > 40) || (breatheOut && counter != 0) ? "breathe out" : "breathe in while holding")
-                    .font(.callout)
-                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.7) : .secondary)
-                    .padding(.top, 4)
-                
-                Spacer()
-                
-                NavigationLink {
-                    TipsView()
-                } label: {
-                    Text("want some other tips?")
-                        .font(.headline)
-                        .padding()
-                        .frame(maxWidth: .infinity)
+                .frame(maxHeight: .infinity, alignment: .center)
+
+                VStack {
+                    Spacer()
+                    NavigationLink {
+                        TipsView()
+                    } label: {
+                        Text("want some other tips?")
+                            .font(.headline)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(
+                                RoundedRectangle(cornerRadius: 50)
+                                    .fill(colorScheme == .dark ? Color.gray.opacity(0.2) : Color.white)
+                            )
+                            .foregroundColor(colorScheme == .dark ? .white : .primary)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 50)
+                                    .stroke(colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05))
+                            )
+                            .shadow(color: colorScheme == .dark ? Color.black.opacity(0.2) : Color.black.opacity(0.04), radius: 6, y: 2)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 20)
+                }
+            }
+            .overlay(alignment: .topTrailing) {
+                Button(action: backToOnboarding) {
+                    Image(systemName: "questionmark.circle.fill")
+                        .font(.system(size: 26, weight: .semibold))
+                        .foregroundColor(.orange)
+                        .padding(10)
                         .background(
-                            RoundedRectangle(cornerRadius: 50)
-                                .fill(colorScheme == .dark ? Color.gray.opacity(0.2) : Color.white)
+                            .ultraThinMaterial,
+                            in: Circle()
                         )
-                        .foregroundColor(colorScheme == .dark ? .white : .primary)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 50)
-                                .stroke(colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05))
+                        .shadow(
+                            color: colorScheme == .dark
+                            ? Color.black.opacity(0.2)
+                            : Color.black.opacity(0.08),
+                            radius: 6,
+                            y: 3
                         )
-                        .shadow(color: colorScheme == .dark ? Color.black.opacity(0.2) : Color.black.opacity(0.04), radius: 6, y: 2)
                 }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 20)
+                .contentShape(Rectangle())
+                .padding(.top, 8)
+                .padding(.trailing, 16)
             }
         }
         .navigationBarBackButtonHidden(true)
         .background(colorScheme == .dark ? Color(red: 18/255, green: 18/255, blue: 18/255) : Color(red: 0.98, green: 0.95, blue: 0.90))
     }
 }
+
