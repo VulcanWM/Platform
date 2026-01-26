@@ -61,8 +61,6 @@ struct BreatheBar: View {
 }
 
 
-
-
 struct HoldButton: ButtonStyle {
     let size: CGFloat
     let introTip: Int
@@ -105,12 +103,6 @@ struct BreatheView: View {
     @Environment(\.colorScheme) var colorScheme
     @AppStorage("onboardingDone") var onboardingDone: Bool = false
     @AppStorage("introTip") var introTip: Int = 1
-    // if introTip is larger than 3, this isn't important
-    // question mark should set the introTip to 1
-    // first introTip will highlight the button and give info about the button
-    // second introTip will highlight the bar on the side, and give info about how this is to show up or down and how u can do it hwoever u like, it will follow u rather than u following i
-    // third introTip will highlight the want other tips button, and will give info about that
-    // what colour should the highlight be?
     
     private func backToOnboarding() {
         onboardingDone = false
@@ -239,6 +231,19 @@ struct BreatheView: View {
                 .padding(.top, 8)
                 .padding(.trailing, 16)
             }
+            .overlay {
+                if introTip <= 3 {
+                    SpeechBubble(
+                        text: introText(for: introTip),
+                        arrowDown: true
+                    )
+                    .frame(maxWidth: 260)
+                    .position(bubblePosition(for: introTip, geo: geo))
+                    .transition(.opacity.combined(with: .scale))
+                    .animation(.easeInOut(duration: 0.3), value: introTip)
+                }
+            }
+
         }
         .navigationBarBackButtonHidden(true)
         .background(colorScheme == .dark ? Color(red: 18/255, green: 18/255, blue: 18/255) : Color(red: 0.98, green: 0.95, blue: 0.90))
