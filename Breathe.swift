@@ -4,25 +4,50 @@ struct BreatheBar: View {
     let size: CGFloat
     let thickness: CGFloat = 10
     let count: Int
-    var sizeOfBreathe: CGFloat { min(CGFloat(count) / 40 * size, size) }
+    let introTip: Int
+
+    var sizeOfBreathe: CGFloat {
+        min(CGFloat(count) / 40 * size, size)
+    }
     
     @Environment(\.colorScheme) var colorScheme
 
     var trackColour: Color {
-        colorScheme == .dark ? Color(.darkGray) : Color(red: 0.88, green: 0.86, blue: 0.83)
+        colorScheme == .dark
+        ? Color(.darkGray)
+        : Color(red: 0.88, green: 0.86, blue: 0.83)
     }
 
     var fillColour: Color {
-        colorScheme == .dark ? Color.orange.opacity(0.9) : Color(red: 0.95, green: 0.55, blue: 0.25)
+        colorScheme == .dark
+        ? Color.orange.opacity(0.9)
+        : Color(red: 0.95, green: 0.55, blue: 0.25)
+    }
+
+    var highlightColour: Color {
+        Color.purple.opacity(0.8)
     }
 
     var body: some View {
         ZStack {
             Capsule()
+                .stroke(
+                    introTip == 2 ? highlightColour : .clear,
+                    lineWidth: 6
+                )
+                .frame(width: thickness + 14, height: size + 14)
+                .offset(x: (size / 2 + thickness / 2) + 20)
+                .shadow(
+                    color: introTip == 2 ? highlightColour.opacity(0.5) : .clear,
+                    radius: 16
+                )
+                .animation(.easeInOut(duration: 0.3), value: introTip)
+
+            Capsule()
                 .fill(trackColour)
                 .frame(width: thickness, height: size)
                 .offset(x: (size / 2 + thickness / 2) + 20)
-
+            
             Capsule()
                 .fill(fillColour)
                 .frame(width: thickness, height: sizeOfBreathe)
@@ -31,15 +56,16 @@ struct BreatheBar: View {
                     y: (size - sizeOfBreathe) / 2
                 )
                 .animation(.easeInOut(duration: 0.15), value: sizeOfBreathe)
-
         }
     }
 }
 
 
 
+
 struct HoldButton: ButtonStyle {
     let size: CGFloat
+    let introTip: Int
     @Environment(\.colorScheme) var colorScheme
 
     func makeBody(configuration: Configuration) -> some View {
@@ -59,6 +85,11 @@ struct HoldButton: ButtonStyle {
             )
             .foregroundStyle(.white)
             .clipShape(Circle())
+            .overlay(
+                Circle()
+                    .stroke(introTip == 1 ? Color.purple.opacity(0.8) : Color.clear, lineWidth: 6)
+                    .animation(.easeInOut(duration: 0.3), value: introTip)
+            )
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
             .shadow(color: colorScheme == .dark ? Color.black.opacity(0.5) : Color.black.opacity(0.3), radius: 12, y: 6)
             .opacity(configuration.isPressed ? 0.9 : 1)
@@ -73,6 +104,13 @@ struct BreatheView: View {
     @State private var breatheOut = true
     @Environment(\.colorScheme) var colorScheme
     @AppStorage("onboardingDone") var onboardingDone: Bool = false
+    @AppStorage("introTip") var introTip: Int = 1
+    // if introTip is larger than 3, this isn't important
+    // question mark should set the introTip to 1
+    // first introTip will highlight the button and give info about the button
+    // second introTip will highlight the bar on the side, and give info about how this is to show up or down and how u can do it hwoever u like, it will follow u rather than u following i
+    // third introTip will highlight the want other tips button, and will give info about that
+    // what colour should the highlight be?
     
     private func backToOnboarding() {
         onboardingDone = false
@@ -99,7 +137,8 @@ struct BreatheView: View {
                     ZStack {
                         BreatheBar(
                             size: buttonSize,
-                            count: counter
+                            count: counter,
+                            introTip: introTip
                         )
                         
                         Button {
@@ -124,7 +163,7 @@ struct BreatheView: View {
                             Text((breatheOut == false && counter > 40) || (breatheOut && counter != 0) ? "let go" : "hold")
                                 .font(.system(size: buttonSize * 0.25, weight: .bold))
                         }
-                        .buttonStyle(HoldButton(size: buttonSize))
+                        .buttonStyle(HoldButton(size: buttonSize, introTip: introTip))
                         .simultaneousGesture(
                             LongPressGesture(minimumDuration: 0.1)
                                 .onEnded { _ in
@@ -170,7 +209,7 @@ struct BreatheView: View {
                             .foregroundColor(colorScheme == .dark ? .white : .primary)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 50)
-                                    .stroke(colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05))
+                                    .stroke(introTip == 3 ? Color.purple.opacity(0.8) : (colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05)), lineWidth: 3)
                             )
                             .shadow(color: colorScheme == .dark ? Color.black.opacity(0.2) : Color.black.opacity(0.04), radius: 6, y: 2)
                     }

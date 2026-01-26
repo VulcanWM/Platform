@@ -20,7 +20,7 @@ struct OnboardingView: View {
             Button {
                 finishOnboarding()
             } label: {
-                Text("see the demo")
+                Text("see the app work")
                     .font(.headline)
                     .padding()
                     .frame(maxWidth: .infinity)
