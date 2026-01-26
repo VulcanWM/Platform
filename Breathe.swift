@@ -72,10 +72,10 @@ struct BreatheView: View {
     @State private var timer: Timer?
     @State private var breatheOut = true
     @Environment(\.colorScheme) var colorScheme
-    @AppStorage("onboardingPage") var onboardingPage: Int = 1
+    @AppStorage("onboardingDone") var onboardingDone: Bool = false
     
     private func backToOnboarding() {
-        onboardingPage = 1
+        onboardingDone = false
     }
 
     var body: some View {
