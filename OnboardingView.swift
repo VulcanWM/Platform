@@ -3,24 +3,35 @@ import SwiftUI
 struct OnboardingView: View {
     @Environment(\.colorScheme) var colorScheme
     @AppStorage("onboardingDone") var onboardingDone: Bool = false
-    private let totalPages = 3
     
     private func finishOnboarding() {
         onboardingDone = true
     }
     
     var body: some View {
-        VStack {
+        VStack(spacing: 24) {
             Spacer()
-            Text("welcome to platform")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+            
+            VStack(spacing: 12) {
+                Text("welcome to platform")
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(colorScheme == .dark ? .white : .primary)
+                
+                Text("designed to help you stay mindful and calm on your daily train journeys.\nfollow the prompts and breathe at your own pace.")
+                    .font(.body)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(colorScheme == .dark ? .white.opacity(0.8) : .secondary)
+                    .lineSpacing(4)
+            }
+            
             Spacer()
+            
             Button {
                 finishOnboarding()
             } label: {
-                Text("see the app work")
+                Text("start exploring")
                     .font(.headline)
                     .padding()
                     .frame(maxWidth: .infinity)
@@ -41,12 +52,12 @@ struct OnboardingView: View {
         .gesture(
             DragGesture()
                 .onEnded { value in
-                    let horizontalAmount = value.translation.width
-                    if horizontalAmount < -50 {
+                    if value.translation.width < -50 {
                         finishOnboarding()
                     }
                 }
         )
+        .padding()
         .background(colorScheme == .dark ? Color(red: 18/255, green: 18/255, blue: 18/255) : Color(red: 0.98, green: 0.95, blue: 0.90))
     }
 }

@@ -106,6 +106,7 @@ struct BreatheView: View {
     
     private func backToOnboarding() {
         onboardingDone = false
+        introTip = 1
     }
 
     var body: some View {
@@ -147,6 +148,9 @@ struct BreatheView: View {
                                         timer?.invalidate()
                                     } else {
                                         counter -= 1
+                                        if (counter == 0 && introTip == 2){
+                                            introTip = 3
+                                        }
                                     }
                                 }
                             }
@@ -167,6 +171,9 @@ struct BreatheView: View {
                                         DispatchQueue.main.async {
                                             counter += 1
                                         }
+                                    }
+                                    if introTip == 1 {
+                                        introTip = 2
                                     }
                                     RunLoop.main.add(timer!, forMode: .common)
                                 }

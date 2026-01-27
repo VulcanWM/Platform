@@ -9,6 +9,7 @@ struct Tip: Identifiable {
 struct TipsView: View {
     @State private var selectedTip: Tip?
     @Environment(\.colorScheme) var colorScheme
+    @AppStorage("introTip") var introTip: Int = 1
 
     let tips: [Tip] = [
         Tip(
@@ -65,6 +66,11 @@ struct TipsView: View {
         .navigationTitle("tips")
         .sheet(item: $selectedTip) { tip in
             TipSheet(tip: tip)
+        }
+        .onAppear {
+            if introTip == 3 {
+                introTip = 4
+            }
         }
         .background(colorScheme == .dark ? Color(red: 18/255, green: 18/255, blue: 18/255) : Color(red: 0.98, green: 0.95, blue: 0.90))
     }
