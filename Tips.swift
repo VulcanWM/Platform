@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct Tip: Identifiable {
+struct Tip: Identifiable, Equatable {
     let id = UUID()
     let title: String
     let body: String
@@ -29,32 +29,51 @@ struct TipsView: View {
             body: "silently pick a simple phrase or word (\"calm\", \"steady\", \"here\").\nrepeat it in your mind.\ngently redirect attention whenever anxiety spikes."
         )
     ]
+    
+    private func tipButton(for tip: Tip) -> some View {
+        Button {
+            selectedTip = tip
+        } label: {
+            HStack {
+                Text(tip.title)
+                    .font(.headline)
+                    .foregroundColor(colorScheme == .dark ? .white : .primary)
+                Spacer()
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 50)
+                    .fill(colorScheme == .dark ? Color.gray.opacity(0.2) : Color.white)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 50)
+                    .stroke(colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05))
+            )
+            .shadow(color: colorScheme == .dark ? Color.black.opacity(0.5) : Color.black.opacity(0.04), radius: 8, y: 4)
+        }
+    }
+
+    @ViewBuilder
+    private func introOverlay(geo: GeometryProxy) -> some View {
+        if introTip == 4 {
+            SpeechBubble(
+                text: introText(for: introTip),
+                arrowDown: true,
+                arrowOnRight: false
+            )
+            .frame(maxWidth: 260)
+            .position(bubblePosition(for: introTip, geo: geo))
+            .transition(.opacity.combined(with: .scale))
+            .animation(.easeInOut(duration: 0.3), value: introTip)
+        }
+    }
 
     var body: some View {
         GeometryReader { geo in
             ZStack {
                 VStack(spacing: 12) {
                     ForEach(tips) { tip in
-                        Button {
-                            selectedTip = tip
-                        } label: {
-                            HStack {
-                                Text(tip.title)
-                                    .font(.headline)
-                                    .foregroundColor(colorScheme == .dark ? .white : .primary)
-                                Spacer()
-                            }
-                            .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 50)
-                                    .fill(colorScheme == .dark ? Color.gray.opacity(0.2) : Color.white)
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 50)
-                                    .stroke(colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05))
-                            )
-                            .shadow(color: colorScheme == .dark ? Color.black.opacity(0.5) : Color.black.opacity(0.04), radius: 8, y: 4)
-                        }
+                        tipButton(for: tip)
                     }
                     
                     Spacer()
@@ -70,24 +89,15 @@ struct TipsView: View {
                     TipSheet(tip: tip)
                 }
                 .overlay {
-                    if introTip == 4 {
-                        SpeechBubble(
-                            text: introText(for: introTip),
-                            arrowDown: true
-                        )
-                        .frame(maxWidth: 260)
-                        .position(bubblePosition(for: introTip, geo: geo))
-                        .transition(.opacity.combined(with: .scale))
-                        .animation(.easeInOut(duration: 0.3), value: introTip)
-                    }
+                    introOverlay(geo: geo)
                 }
                 Color.clear
                     .contentShape(Rectangle())
                     .onTapGesture {
                         if introTip == 4 {
                             introTip = 5
+                        }
                     }
-                }
             }
         }
         .onAppear {

@@ -242,7 +242,8 @@ struct BreatheView: View {
                 if introTip <= 3 {
                     SpeechBubble(
                         text: introText(for: introTip),
-                        arrowDown: true
+                        arrowDown: true,
+                        arrowOnRight: introTip == 2
                     )
                     .frame(maxWidth: 260)
                     .position(bubblePosition(for: introTip, geo: geo))
