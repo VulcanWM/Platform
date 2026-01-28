@@ -20,7 +20,7 @@ struct SpeechBubble: View {
             .overlay(
                 BubbleShape(
                     arrowDown: arrowDown,
-                    arrowOnRight: arowOnRight
+                    arrowOnRight: arrowOnRight
                 )
                 .stroke(Color.purple.opacity(0.6), lineWidth: 2)
             )

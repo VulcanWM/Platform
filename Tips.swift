@@ -65,12 +65,14 @@ struct TipsView: View {
             .position(bubblePosition(for: introTip, geo: geo))
             .transition(.opacity.combined(with: .scale))
             .animation(.easeInOut(duration: 0.3), value: introTip)
+            .allowsHitTesting(false)
         }
     }
 
     var body: some View {
         GeometryReader { geo in
             ZStack {
+                // main content
                 VStack(spacing: 12) {
                     ForEach(tips) { tip in
                         tipButton(for: tip)
@@ -88,16 +90,16 @@ struct TipsView: View {
                 .sheet(item: $selectedTip) { tip in
                     TipSheet(tip: tip)
                 }
-                .overlay {
-                    introOverlay(geo: geo)
-                }
-                Color.clear
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        if introTip == 4 {
+                
+                if introTip == 4 {
+                    Color.black.opacity(0.001)
+                        .edgesIgnoringSafeArea(.all)
+                        .onTapGesture {
                             introTip = 5
                         }
-                    }
+                }
+
+                introOverlay(geo: geo)
             }
         }
         .onAppear {
