@@ -59,21 +59,27 @@ func bubblePosition(for step: Int, geo: GeometryProxy) -> CGPoint {
             x: geo.size.width / 2,
             y: geo.size.height / 2 - 140
         )
-
+        
     case 2:
         // above bar, arrow points down to it
         return CGPoint(
-            x: geo.size.width / 2 - geo.size.width * 0.18,
-            y: geo.size.height / 2 - 160
+            x: geo.size.width / 2 + geo.size.width * 0.18,
+            y: geo.size.height / 2 - 220
         )
-
+        
     case 3:
         // above tips button
         return CGPoint(
             x: geo.size.width / 2,
-            y: geo.size.height - 140
+            y: geo.size.height - 90
         )
-
+    case 4:
+        // above
+        return CGPoint(
+            x: geo.size.width / 2,
+            y: geo.size.height - 80
+        )
+        
     default:
         return .zero
     }
@@ -87,6 +93,8 @@ func introText(for step: Int) -> String {
         return "this follows you.\nbreathe however feels right."
     case 3:
         return "extra grounding tips.\nonly if you want them."
+    case 4:
+        return "this moment will pass.\nso will the train."
     default:
         return ""
     }

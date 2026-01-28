@@ -31,41 +31,64 @@ struct TipsView: View {
     ]
 
     var body: some View {
-        VStack(spacing: 12) {
-            ForEach(tips) { tip in
-                Button {
-                    selectedTip = tip
-                } label: {
-                    HStack {
-                        Text(tip.title)
-                            .font(.headline)
-                            .foregroundColor(colorScheme == .dark ? .white : .primary)
-                        Spacer()
+        GeometryReader { geo in
+            ZStack {
+                VStack(spacing: 12) {
+                    ForEach(tips) { tip in
+                        Button {
+                            selectedTip = tip
+                        } label: {
+                            HStack {
+                                Text(tip.title)
+                                    .font(.headline)
+                                    .foregroundColor(colorScheme == .dark ? .white : .primary)
+                                Spacer()
+                            }
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 50)
+                                    .fill(colorScheme == .dark ? Color.gray.opacity(0.2) : Color.white)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 50)
+                                    .stroke(colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05))
+                            )
+                            .shadow(color: colorScheme == .dark ? Color.black.opacity(0.5) : Color.black.opacity(0.04), radius: 8, y: 4)
+                        }
                     }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 50)
-                            .fill(colorScheme == .dark ? Color.gray.opacity(0.2) : Color.white)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 50)
-                            .stroke(colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05))
-                    )
-                    .shadow(color: colorScheme == .dark ? Color.black.opacity(0.5) : Color.black.opacity(0.04), radius: 8, y: 4)
+                    
+                    Spacer()
+                    
+                    Text("you'll be fine")
+                        .font(.callout)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 8)
+                }
+                .padding()
+                .navigationTitle("tips")
+                .sheet(item: $selectedTip) { tip in
+                    TipSheet(tip: tip)
+                }
+                .overlay {
+                    if introTip == 4 {
+                        SpeechBubble(
+                            text: introText(for: introTip),
+                            arrowDown: true
+                        )
+                        .frame(maxWidth: 260)
+                        .position(bubblePosition(for: introTip, geo: geo))
+                        .transition(.opacity.combined(with: .scale))
+                        .animation(.easeInOut(duration: 0.3), value: introTip)
+                    }
+                }
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        if introTip == 4 {
+                            introTip = 5
+                    }
                 }
             }
-
-            Spacer()
-            
-            Text("you'll be fine")
-                .font(.callout)
-                .foregroundColor(.secondary)
-                .padding(.top, 8)
-        }
-        .padding()
-        .navigationTitle("tips")
-        .sheet(item: $selectedTip) { tip in
-            TipSheet(tip: tip)
         }
         .onAppear {
             if introTip == 3 {
