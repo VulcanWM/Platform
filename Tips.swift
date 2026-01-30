@@ -120,8 +120,6 @@ struct TipModal: View {
 
     var body: some View {
         ZStack {
-
-            // blur + dim
             Rectangle()
                 .fill(.ultraThinMaterial)
                 .ignoresSafeArea()

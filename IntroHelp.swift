@@ -8,9 +8,10 @@ struct SpeechBubble: View {
     
     var highlightColour: Color {
         colorScheme == .dark
-        ? Color.white
-        : Color.black
+            ? Color(red: 0.98, green: 0.92, blue: 0.75)
+            : Color(red: 0.92, green: 0.85, blue: 0.65)
     }
+
 
     var body: some View {
         Text(text)
