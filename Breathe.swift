@@ -25,7 +25,9 @@ struct BreatheBar: View {
     }
 
     var highlightColour: Color {
-        Color.purple.opacity(0.8)
+        colorScheme == .dark
+        ? Color.white
+        : Color.black
     }
 
     var body: some View {
@@ -65,6 +67,12 @@ struct HoldButton: ButtonStyle {
     let size: CGFloat
     let introTip: Int
     @Environment(\.colorScheme) var colorScheme
+    
+    var highlightColour: Color {
+        colorScheme == .dark
+        ? Color.white
+        : Color.black
+    }
 
     func makeBody(configuration: Configuration) -> some View {
         let gradientColors = colorScheme == .dark ?
@@ -85,7 +93,7 @@ struct HoldButton: ButtonStyle {
             .clipShape(Circle())
             .overlay(
                 Circle()
-                    .stroke(introTip == 1 ? Color.purple.opacity(0.8) : Color.clear, lineWidth: 6)
+                    .stroke(introTip == 1 ? highlightColour : Color.clear, lineWidth: 6)
                     .animation(.easeInOut(duration: 0.3), value: introTip)
             )
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
@@ -103,6 +111,12 @@ struct BreatheView: View {
     @Environment(\.colorScheme) var colorScheme
     @AppStorage("onboardingDone") var onboardingDone: Bool = false
     @AppStorage("introTip") var introTip: Int = 1
+    
+    var highlightColour: Color {
+        colorScheme == .dark
+        ? Color.white
+        : Color.black
+    }
     
     private func backToOnboarding() {
         onboardingDone = false
@@ -208,7 +222,7 @@ struct BreatheView: View {
                             .foregroundColor(colorScheme == .dark ? .white : .primary)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 50)
-                                    .stroke(introTip == 3 ? Color.purple.opacity(0.8) : (colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05)), lineWidth: 3)
+                                    .stroke(introTip == 3 ? highlightColour : (colorScheme == .dark ? Color.white.opacity(0.1) : Color.black.opacity(0.05)), lineWidth: 3)
                             )
                             .shadow(color: colorScheme == .dark ? Color.black.opacity(0.2) : Color.black.opacity(0.04), radius: 6, y: 2)
                     }

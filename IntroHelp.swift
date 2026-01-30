@@ -4,6 +4,13 @@ struct SpeechBubble: View {
     let text: String
     let arrowDown: Bool
     let arrowOnRight: Bool
+    @Environment(\.colorScheme) var colorScheme
+    
+    var highlightColour: Color {
+        colorScheme == .dark
+        ? Color.white
+        : Color.black
+    }
 
     var body: some View {
         Text(text)
@@ -22,7 +29,7 @@ struct SpeechBubble: View {
                     arrowDown: arrowDown,
                     arrowOnRight: arrowOnRight
                 )
-                .stroke(Color.purple.opacity(0.6), lineWidth: 2)
+                .stroke(highlightColour, lineWidth: 2)
             )
             .shadow(radius: 8)
     }

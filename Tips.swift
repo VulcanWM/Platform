@@ -72,7 +72,6 @@ struct TipsView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                // main content
                 VStack(spacing: 12) {
                     ForEach(tips) { tip in
                         tipButton(for: tip)
@@ -87,16 +86,19 @@ struct TipsView: View {
                 }
                 .padding()
                 .navigationTitle("tips")
-                .sheet(item: $selectedTip) { tip in
-                    TipSheet(tip: tip)
-                }
-                
+
                 if introTip == 4 {
                     Color.black.opacity(0.001)
                         .edgesIgnoringSafeArea(.all)
                         .onTapGesture {
                             introTip = 5
                         }
+                }
+                
+                if let tip = selectedTip {
+                    TipModal(tip: tip) {
+                        selectedTip = nil
+                    }
                 }
 
                 introOverlay(geo: geo)
@@ -111,27 +113,48 @@ struct TipsView: View {
     }
 }
 
-struct TipSheet: View {
+struct TipModal: View {
     let tip: Tip
+    let dismiss: () -> Void
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
+        ZStack {
 
-            Text(tip.title)
-                .font(.title2)
-                .fontWeight(.semibold)
-                .foregroundColor(colorScheme == .dark ? .white : .primary)
+            // blur + dim
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    dismiss()
+                }
 
-            Text(tip.body)
-                .font(.body)
-                .multilineTextAlignment(.center)
-                .lineSpacing(6)
-                .foregroundColor(colorScheme == .dark ? Color.white.opacity(0.85) : .primary)
+            VStack(spacing: 20) {
 
-            Spacer()
+                Text(tip.title)
+                    .font(.title2)
+                    .fontWeight(.semibold)
+
+                Text(tip.body)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(6)
+
+            }
+            .padding(28)
+            .frame(maxWidth: 340)
+            .background(
+                RoundedRectangle(cornerRadius: 28)
+                    .fill(colorScheme == .dark
+                          ? Color(white: 0.12)
+                          : Color.white.opacity(0.9))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 28)
+                    .stroke(Color.white.opacity(0.15))
+            )
+            .shadow(radius: 30)
         }
-        .padding(32)
+        .transition(.opacity)
+        .animation(.easeOut(duration: 0.2), value: tip)
     }
 }
